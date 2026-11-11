@@ -75,6 +75,7 @@ A GitHub Actions workflow runs `mvn --batch-mode verify` on pushes and pull requ
 | `/` | Monthly overview and recent transactions |
 | `/transactions` | Transaction history |
 | `/transactions/new` | Add an income or expense |
+| `/transactions/export` | Download the currently filtered transactions as CSV |
 | `/budgets` | Configure monthly category budgets |
 | `/reports` | Monthly category spending summary |
 
