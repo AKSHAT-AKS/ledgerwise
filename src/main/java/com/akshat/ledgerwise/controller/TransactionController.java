@@ -22,8 +22,17 @@ public class TransactionController {
     }
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("transactions", finance.allTransactions());
+    public String list(@RequestParam(required = false) String q,
+                       @RequestParam(required = false) TransactionType type, Model model) {
+        var filtered = finance.allTransactions().stream()
+                .filter(t -> q == null || q.isBlank() || t.getDescription().toLowerCase().contains(q.trim().toLowerCase())
+                        || (t.getNotes() != null && t.getNotes().toLowerCase().contains(q.trim().toLowerCase())))
+                .filter(t -> type == null || t.getType() == type)
+                .toList();
+        model.addAttribute("transactions", filtered);
+        model.addAttribute("query", q == null ? "" : q);
+        model.addAttribute("selectedType", type);
+        model.addAttribute("types", TransactionType.values());
         return "transactions";
     }
 
