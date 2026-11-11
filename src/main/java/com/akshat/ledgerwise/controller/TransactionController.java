@@ -60,7 +60,6 @@ public class TransactionController {
                          BindingResult result, Model model, RedirectAttributes redirect) {
         FinancialTransaction existing = getTransaction(id);
         if (result.hasErrors()) {
-            submitted.setTransactionDate(submitted.getTransactionDate());
             prepareForm(model, submitted, true);
             return "transaction-form";
         }
