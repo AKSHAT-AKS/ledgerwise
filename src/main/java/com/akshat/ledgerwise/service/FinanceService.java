@@ -5,6 +5,7 @@ public class FinanceService {
  private final TransactionRepository transactions; private final BudgetRepository budgets;
  public FinanceService(TransactionRepository t,BudgetRepository b){transactions=t;budgets=b;}
  @Transactional(readOnly=true) public List<FinancialTransaction> allTransactions(){return transactions.findAllByOrderByTransactionDateDescIdDesc();}
+ @Transactional(readOnly=true) public Optional<FinancialTransaction> findTransaction(Long id){return transactions.findById(id);}
  public FinancialTransaction saveTransaction(FinancialTransaction t){return transactions.save(t);} public void deleteTransaction(Long id){transactions.deleteById(id);}
  @Transactional(readOnly=true) public List<MonthlyBudget> budgetsFor(String month){return budgets.findByMonthKeyOrderByCategoryAsc(month);}
  public MonthlyBudget saveBudget(MonthlyBudget budget){budgets.findByMonthKeyOrderByCategoryAsc(budget.getMonthKey()).stream().filter(b->b.getCategory()==budget.getCategory()).findFirst().ifPresent(b->budget.setId(b.getId()));return budgets.save(budget);}
