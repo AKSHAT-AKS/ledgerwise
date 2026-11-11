@@ -32,7 +32,8 @@ public class TransactionController {
                        @RequestParam(required = false) Category category,
                        @RequestParam(required = false) LocalDate from,
                        @RequestParam(required = false) LocalDate to, Model model) {
-        List<FinancialTransaction> filtered = filteredTransactions(q, type, category, from, to);\n        model.addAttribute("transactions", filtered);
+        List<FinancialTransaction> filtered = filteredTransactions(q, type, category, from, to);
+        model.addAttribute("transactions", filtered);
         model.addAttribute("query", q == null ? "" : q);
         model.addAttribute("selectedType", type);
         model.addAttribute("types", TransactionType.values());
