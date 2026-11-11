@@ -17,8 +17,7 @@ class MonthlyBudgetValidationTest {
         MonthlyBudget budget = new MonthlyBudget();
         budget.setMonthKey("2026-11");
 
-        assertFalse(validator.validateProperty(budget, "monthKey").stream()
-                .anyMatch(violation -> true));
+        assertTrue(validator.validateProperty(budget, "monthKey").isEmpty());
     }
 
     @Test
@@ -26,7 +25,6 @@ class MonthlyBudgetValidationTest {
         MonthlyBudget budget = new MonthlyBudget();
         budget.setMonthKey("2026-13");
 
-        assertTrue(validator.validateProperty(budget, "monthKey").stream()
-                .anyMatch(violation -> violation.getPropertyPath().toString().equals("monthKey")));
+        assertFalse(validator.validateProperty(budget, "monthKey").isEmpty());
     }
 }
