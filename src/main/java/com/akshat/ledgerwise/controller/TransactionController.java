@@ -23,16 +23,26 @@ public class TransactionController {
 
     @GetMapping
     public String list(@RequestParam(required = false) String q,
-                       @RequestParam(required = false) TransactionType type, Model model) {
+                       @RequestParam(required = false) TransactionType type,
+                       @RequestParam(required = false) Category category,
+                       @RequestParam(required = false) LocalDate from,
+                       @RequestParam(required = false) LocalDate to, Model model) {
         var filtered = finance.allTransactions().stream()
                 .filter(t -> q == null || q.isBlank() || t.getDescription().toLowerCase().contains(q.trim().toLowerCase())
                         || (t.getNotes() != null && t.getNotes().toLowerCase().contains(q.trim().toLowerCase())))
                 .filter(t -> type == null || t.getType() == type)
+                .filter(t -> category == null || t.getCategory() == category)
+                .filter(t -> from == null || !t.getTransactionDate().isBefore(from))
+                .filter(t -> to == null || !t.getTransactionDate().isAfter(to))
                 .toList();
         model.addAttribute("transactions", filtered);
         model.addAttribute("query", q == null ? "" : q);
         model.addAttribute("selectedType", type);
         model.addAttribute("types", TransactionType.values());
+        model.addAttribute("categories", Category.values());
+        model.addAttribute("selectedCategory", category);
+        model.addAttribute("from", from);
+        model.addAttribute("to", to);
         return "transactions";
     }
 
