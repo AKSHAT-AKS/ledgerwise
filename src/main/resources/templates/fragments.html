@@ -1,0 +1,5 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"><body>
+<nav th:fragment="nav" class="nav"><a class="brand" th:href="@{/}"><span class="brand-mark">L</span> LedgerWise</a><div class="nav-links"><a th:href="@{/}">Overview</a><a th:href="@{/transactions}">Transactions</a><a th:href="@{/budgets}">Budgets</a><a th:href="@{/reports}">Reports</a></div><a class="button button-small" th:href="@{/transactions/new}">+ Add transaction</a></nav>
+<div th:fragment="flash" th:if="${success}" class="flash" th:text="${success}"></div>
+</body></html>
