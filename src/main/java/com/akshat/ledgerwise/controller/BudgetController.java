@@ -1,0 +1,7 @@
+package com.akshat.ledgerwise.controller;
+import com.akshat.ledgerwise.model.*; import com.akshat.ledgerwise.service.FinanceService; import jakarta.validation.Valid; import org.springframework.stereotype.Controller; import org.springframework.ui.Model; import org.springframework.validation.BindingResult; import org.springframework.web.bind.annotation.*; import org.springframework.web.servlet.mvc.support.RedirectAttributes; import java.time.YearMonth;
+@Controller @RequestMapping("/budgets") public class BudgetController {
+ private final FinanceService finance; public BudgetController(FinanceService f){finance=f;}
+ @GetMapping public String list(@RequestParam(required=false) String month,Model m){String selected=(month==null||month.isBlank())?YearMonth.now().toString():month;m.addAttribute("month",selected);m.addAttribute("budgets",finance.budgetsFor(selected));m.addAttribute("categories",Category.values());MonthlyBudget b=new MonthlyBudget();b.setMonthKey(selected);m.addAttribute("budget",b);return "budgets";}
+ @PostMapping public String save(@Valid @ModelAttribute("budget") MonthlyBudget b,BindingResult r,Model m,RedirectAttributes a){if(r.hasErrors()){String month=b.getMonthKey()==null?YearMonth.now().toString():b.getMonthKey();m.addAttribute("month",month);m.addAttribute("budgets",finance.budgetsFor(month));m.addAttribute("categories",Category.values());return "budgets";}finance.saveBudget(b);a.addFlashAttribute("success","Budget saved.");return "redirect:/budgets?month="+b.getMonthKey();}
+}

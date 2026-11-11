@@ -1,0 +1,3 @@
+package com.akshat.ledgerwise.controller;
+import com.akshat.ledgerwise.service.FinanceService; import org.springframework.stereotype.Controller; import org.springframework.ui.Model; import org.springframework.web.bind.annotation.*; import java.time.YearMonth;
+@Controller public class DashboardController { private final FinanceService finance; public DashboardController(FinanceService f){finance=f;} @GetMapping("/") public String dashboard(@RequestParam(required=false) String month,Model model){String selected=(month==null||month.isBlank())?YearMonth.now().toString():month;model.addAllAttributes(finance.dashboard(selected));return "dashboard";} }

@@ -1,0 +1,9 @@
+package com.akshat.ledgerwise.controller;
+import com.akshat.ledgerwise.model.*; import com.akshat.ledgerwise.service.FinanceService; import jakarta.validation.Valid; import org.springframework.stereotype.Controller; import org.springframework.ui.Model; import org.springframework.validation.BindingResult; import org.springframework.web.bind.annotation.*; import org.springframework.web.servlet.mvc.support.RedirectAttributes; import java.time.LocalDate;
+@Controller @RequestMapping("/transactions") public class TransactionController {
+ private final FinanceService finance; public TransactionController(FinanceService f){finance=f;}
+ @GetMapping public String list(Model m){m.addAttribute("transactions",finance.allTransactions());return "transactions";}
+ @GetMapping("/new") public String form(Model m){FinancialTransaction t=new FinancialTransaction();t.setTransactionDate(LocalDate.now());t.setType(TransactionType.EXPENSE);m.addAttribute("transaction",t);m.addAttribute("categories",Category.values());m.addAttribute("types",TransactionType.values());return "transaction-form";}
+ @PostMapping public String save(@Valid @ModelAttribute("transaction") FinancialTransaction t,BindingResult r,Model m,RedirectAttributes a){if(r.hasErrors()){m.addAttribute("categories",Category.values());m.addAttribute("types",TransactionType.values());return "transaction-form";}finance.saveTransaction(t);a.addFlashAttribute("success","Transaction saved.");return "redirect:/transactions";}
+ @PostMapping("/{id}/delete") public String delete(@PathVariable Long id,RedirectAttributes a){finance.deleteTransaction(id);a.addFlashAttribute("success","Transaction deleted.");return "redirect:/transactions";}
+}
