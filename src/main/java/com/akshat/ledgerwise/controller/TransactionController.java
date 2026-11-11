@@ -55,7 +55,7 @@ public class TransactionController {
         for (FinancialTransaction transaction : filteredTransactions(q, type, category, from, to)) {
             csv.append(csvCell(transaction.getTransactionDate().toString(), false)).append(',')
                     .append(csvCell(transaction.getType().name(), false)).append(',')
-                    .append(csvCell(transaction.getCategory().label(), false)).append(',')
+                    .append(csvCell(transaction.getCategory().getLabel(), false)).append(',')
                     .append(csvCell(transaction.getDescription(), true)).append(',')
                     .append(csvCell(transaction.getAmount().toPlainString(), false)).append(',')
                     .append(csvCell(transaction.getNotes(), true)).append("\r\n");
