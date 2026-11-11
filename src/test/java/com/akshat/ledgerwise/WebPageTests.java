@@ -105,6 +105,22 @@ class WebPageTests {
                 .andExpect(model().attribute("transactions", org.hamcrest.Matchers.hasSize(1)));
     }
 
+    @Test
+    @Transactional
+    void csvExportIncludesFilteredRowsAndProtectsFormulaCells() throws Exception {
+        transactionRepository.saveAndFlush(createTransaction(
+                "=1+1", "20.00", TransactionType.EXPENSE, Category.FOOD,
+                LocalDate.of(2026, 11, 10)));
+
+        mockMvc.perform(get("/transactions/export").param("category", "FOOD"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/csv"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Content-Disposition",
+                                "attachment; filename=ledgerwise-transactions.csv"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("'=1+1")));
+    }
+
     private FinancialTransaction createTransaction(String description, String amount,
                                                    TransactionType type, Category category,
                                                    LocalDate date) {
