@@ -3,7 +3,7 @@ import jakarta.persistence.*; import jakarta.validation.constraints.*; import ja
 @Entity @Table(name="monthly_budgets",uniqueConstraints=@UniqueConstraint(columnNames={"month_key","category"}))
 public class MonthlyBudget {
  @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
- @Column(name="month_key",nullable=false,length=7) @Pattern(regexp="\\d{4}-\\d{2}") private String monthKey;
+ @NotBlank @Column(name="month_key",nullable=false,length=7) @Pattern(regexp="\\d{4}-\\d{2}",message="Month must use YYYY-MM format") private String monthKey;
  @Enumerated(EnumType.STRING) @NotNull private Category category;
  @NotNull @DecimalMin("0.01") @Digits(integer=10,fraction=2) private BigDecimal limitAmount;
  public Long getId(){return id;} public void setId(Long v){id=v;} public String getMonthKey(){return monthKey;} public void setMonthKey(String v){monthKey=v;}
