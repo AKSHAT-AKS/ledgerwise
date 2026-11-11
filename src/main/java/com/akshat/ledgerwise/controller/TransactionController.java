@@ -3,7 +3,10 @@ package com.akshat.ledgerwise.controller;
 import com.akshat.ledgerwise.model.*;
 import com.akshat.ledgerwise.service.FinanceService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Controller
 @RequestMapping("/transactions")
@@ -27,15 +32,7 @@ public class TransactionController {
                        @RequestParam(required = false) Category category,
                        @RequestParam(required = false) LocalDate from,
                        @RequestParam(required = false) LocalDate to, Model model) {
-        var filtered = finance.allTransactions().stream()
-                .filter(t -> q == null || q.isBlank() || t.getDescription().toLowerCase().contains(q.trim().toLowerCase())
-                        || (t.getNotes() != null && t.getNotes().toLowerCase().contains(q.trim().toLowerCase())))
-                .filter(t -> type == null || t.getType() == type)
-                .filter(t -> category == null || t.getCategory() == category)
-                .filter(t -> from == null || !t.getTransactionDate().isBefore(from))
-                .filter(t -> to == null || !t.getTransactionDate().isAfter(to))
-                .toList();
-        model.addAttribute("transactions", filtered);
+        List<FinancialTransaction> filtered = filteredTransactions(q, type, category, from, to);\n        model.addAttribute("transactions", filtered);
         model.addAttribute("query", q == null ? "" : q);
         model.addAttribute("selectedType", type);
         model.addAttribute("types", TransactionType.values());
@@ -44,6 +41,52 @@ public class TransactionController {
         model.addAttribute("from", from);
         model.addAttribute("to", to);
         return "transactions";
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(@RequestParam(required = false) String q,
+                                         @RequestParam(required = false) TransactionType type,
+                                         @RequestParam(required = false) Category category,
+                                         @RequestParam(required = false) LocalDate from,
+                                         @RequestParam(required = false) LocalDate to) {
+        StringBuilder csv = new StringBuilder();
+        csv.append("Date,Type,Category,Description,Amount,Notes\r\n");
+        for (FinancialTransaction transaction : filteredTransactions(q, type, category, from, to)) {
+            csv.append(csvCell(transaction.getTransactionDate().toString(), false)).append(',')
+                    .append(csvCell(transaction.getType().name(), false)).append(',')
+                    .append(csvCell(transaction.getCategory().label(), false)).append(',')
+                    .append(csvCell(transaction.getDescription(), true)).append(',')
+                    .append(csvCell(transaction.getAmount().toPlainString(), false)).append(',')
+                    .append(csvCell(transaction.getNotes(), true)).append("\r\n");
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ledgerwise-transactions.csv")
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .body(csv.toString().getBytes(StandardCharsets.UTF_8));
+    }
+
+    private List<FinancialTransaction> filteredTransactions(String q, TransactionType type,
+                                                              Category category, LocalDate from, LocalDate to) {
+        return finance.allTransactions().stream()
+                .filter(t -> q == null || q.isBlank()
+                        || t.getDescription().toLowerCase().contains(q.trim().toLowerCase())
+                        || (t.getNotes() != null && t.getNotes().toLowerCase().contains(q.trim().toLowerCase())))
+                .filter(t -> type == null || t.getType() == type)
+                .filter(t -> category == null || t.getCategory() == category)
+                .filter(t -> from == null || !t.getTransactionDate().isBefore(from))
+                .filter(t -> to == null || !t.getTransactionDate().isAfter(to))
+                .toList();
+    }
+
+    private String csvCell(String value, boolean protectFormula) {
+        String safe = value == null ? "" : value;
+        if (protectFormula && !safe.isEmpty()) {
+            char first = safe.stripLeading().charAt(0);
+            if (first == '=' || first == '+' || first == '-' || first == '@') {
+                safe = "'" + safe;
+            }
+        }
+        return "\"" + safe.replace("\"", "\"\"") + "\"";
     }
 
     @GetMapping("/new")
