@@ -46,6 +46,37 @@ class FinanceServiceTest {
         assertEquals(new BigDecimal("180.00"), totals.get(Category.TRANSPORT));
     }
 
+
+    @Test
+    void cashFlowTrendReturnsSixMonthsInOrderAndScalesAgainstLargestValue() {
+        FinancialTransaction salary = transaction("Salary", "1000.00", TransactionType.INCOME);
+        FinancialTransaction groceries = transaction("Groceries", "250.00", TransactionType.EXPENSE);
+        when(transactions.findByTypeAndTransactionDateBetween(
+                any(TransactionType.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenAnswer(invocation -> {
+                    TransactionType type = invocation.getArgument(0);
+                    LocalDate start = invocation.getArgument(1);
+                    if (start.equals(LocalDate.of(2026, 11, 1))
+                            && type == TransactionType.INCOME) {
+                        return List.of(salary);
+                    }
+                    if (start.equals(LocalDate.of(2026, 11, 1))
+                            && type == TransactionType.EXPENSE) {
+                        return List.of(groceries);
+                    }
+                    return List.of();
+                });
+
+        var trend = finance.cashFlowTrend("2026-11");
+
+        assertEquals(6, trend.size());
+        assertEquals("2026-06", trend.get(0).get("month"));
+        assertEquals("2026-11", trend.get(5).get("month"));
+        assertEquals(100, trend.get(5).get("incomePercent"));
+        assertEquals(25, trend.get(5).get("expensePercent"));
+        assertEquals(0, trend.get(0).get("incomePercent"));
+    }
+
     private FinancialTransaction transaction(String description, String amount, TransactionType type) {
         FinancialTransaction t = new FinancialTransaction();
         t.setDescription(description);
