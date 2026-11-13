@@ -121,6 +121,43 @@ class WebPageTests {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("'=1+1")));
     }
 
+    @Test
+    @Transactional
+    void transactionListPaginatesAndKeepsNewestEntriesFirst() throws Exception {
+        for (int i = 1; i <= 12; i++) {
+            transactionRepository.saveAndFlush(createTransaction(
+                    "Page test " + i, "10.00", TransactionType.EXPENSE, Category.FOOD,
+                    LocalDate.of(2026, 11, i)));
+        }
+
+        mockMvc.perform(get("/transactions").param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("transactions", org.hamcrest.Matchers.hasSize(10)))
+                .andExpect(model().attribute("currentPage", 0))
+                .andExpect(model().attribute("totalPages", 2))
+                .andExpect(model().attribute("hasNext", true));
+
+        mockMvc.perform(get("/transactions").param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("transactions", org.hamcrest.Matchers.hasSize(2)))
+                .andExpect(model().attribute("currentPage", 1))
+                .andExpect(model().attribute("hasPrevious", true));
+    }
+
+    @Test
+    @Transactional
+    void outOfRangePageFallsBackToLastAvailablePage() throws Exception {
+        for (int i = 1; i <= 12; i++) {
+            transactionRepository.saveAndFlush(createTransaction(
+                    "Range test " + i, "10.00", TransactionType.EXPENSE, Category.FOOD,
+                    LocalDate.of(2026, 10, i)));
+        }
+        mockMvc.perform(get("/transactions").param("page", "500"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("currentPage", 1))
+                .andExpect(model().attribute("transactions", org.hamcrest.Matchers.hasSize(2)));
+    }
+
     private FinancialTransaction createTransaction(String description, String amount,
                                                    TransactionType type, Category category,
                                                    LocalDate date) {
