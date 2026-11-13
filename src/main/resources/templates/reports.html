@@ -1,2 +1,86 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reports · LedgerWise</title><link rel="stylesheet" th:href="@{/css/app.css}"></head><body><div class="shell"><div th:replace="~{fragments :: nav}"></div><main><div class="page-heading"><div><p class="eyebrow">UNDERSTAND YOUR HABITS</p><h1>Monthly report</h1><p class="muted">A category-level view of your spending.</p></div><form method="get" class="month-picker"><label for="month">Month</label><input id="month" type="month" name="month" th:value="${month}"><button class="button button-light">View</button></form></div><section class="summary-grid"><div class="stat-card"><span class="stat-label">Income</span><strong class="stat-value positive" th:text="'₹ ' + ${#numbers.formatDecimal(income,1,2)}"></strong></div><div class="stat-card"><span class="stat-label">Expenses</span><strong class="stat-value negative" th:text="'₹ ' + ${#numbers.formatDecimal(expense,1,2)}"></strong></div><div class="stat-card"><span class="stat-label">Net balance</span><strong class="stat-value" th:text="'₹ ' + ${#numbers.formatDecimal(balance,1,2)}"></strong></div></section><section class="panel"><div class="panel-heading"><div><h2>Expenses by category</h2><p class="muted">Category totals for the selected month</p></div></div><div class="empty-state" th:if="${#maps.isEmpty(categoryTotals)}"><p>No expenses recorded for this month.</p></div><div class="category-report" th:each="entry : ${categoryTotals}"><div class="budget-top"><strong th:text="${entry.key.label}">Food</strong><strong th:text="'₹ ' + ${#numbers.formatDecimal(entry.value,1,2)}">₹0</strong></div></div></section></main><footer>LedgerWise <span>Spend with intention.</span></footer></div></body></html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reports · LedgerWise</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="shell">
+    <div th:replace="~{fragments :: nav}"></div>
+    <main>
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">UNDERSTAND YOUR HABITS</p>
+                <h1>Monthly report</h1>
+                <p class="muted">A category-level view of your spending.</p>
+            </div>
+            <form method="get" class="month-picker">
+                <label for="month">Month</label>
+                <input id="month" type="month" name="month" th:value="${month}">
+                <button class="button button-light">View</button>
+            </form>
+        </div>
+
+        <section class="summary-grid">
+            <div class="stat-card">
+                <span class="stat-label">Income</span>
+                <strong class="stat-value positive" th:text="'₹ ' + ${#numbers.formatDecimal(income,1,2)}"></strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Expenses</span>
+                <strong class="stat-value negative" th:text="'₹ ' + ${#numbers.formatDecimal(expense,1,2)}"></strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Net balance</span>
+                <strong class="stat-value" th:text="'₹ ' + ${#numbers.formatDecimal(balance,1,2)}"></strong>
+            </div>
+        </section>
+
+        <section class="panel cash-flow-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Six-month cash flow</h2>
+                    <p class="muted">Income and expenses leading up to the selected month</p>
+                </div>
+                <div class="chart-legend">
+                    <span><i class="legend-income"></i>Income</span>
+                    <span><i class="legend-expense"></i>Expenses</span>
+                </div>
+            </div>
+            <div class="cash-flow-chart" th:each="row : ${cashFlow}">
+                <div class="cash-flow-month" th:text="${row.label}">Nov 2026</div>
+                <div class="cash-flow-bars">
+                    <div class="cash-flow-bar income-bar" th:style="'width:' + ${row.incomePercent} + '%'"></div>
+                    <div class="cash-flow-bar expense-bar" th:style="'width:' + ${row.expensePercent} + '%'"></div>
+                </div>
+                <div class="cash-flow-values">
+                    <span th:text="'₹ ' + ${#numbers.formatDecimal(row.income,1,0)}">₹ 0</span>
+                    <span th:text="'₹ ' + ${#numbers.formatDecimal(row.expense,1,0)}">₹ 0</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Expenses by category</h2>
+                    <p class="muted">Category totals for the selected month</p>
+                </div>
+            </div>
+            <div class="empty-state" th:if="${#maps.isEmpty(categoryTotals)}">
+                <p>No expenses recorded for this month.</p>
+            </div>
+            <div class="category-report" th:each="entry : ${categoryTotals}">
+                <div class="budget-top">
+                    <strong th:text="${entry.key.label}">Food</strong>
+                    <strong th:text="'₹ ' + ${#numbers.formatDecimal(entry.value,1,2)}">₹0</strong>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>LedgerWise <span>Spend with intention.</span></footer>
+</div>
+</body>
+</html>
