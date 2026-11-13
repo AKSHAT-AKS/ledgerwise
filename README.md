@@ -11,6 +11,7 @@
 - Create monthly spending limits by category.
 - Track income, expenses, net balance, and budget progress.
 - Review monthly totals grouped by expense category.
+- Compare six months of income and expenses in the cash-flow report.
 - Store data locally with H2 or use PostgreSQL.
 - Validate form input and run tests through GitHub Actions.
 
