@@ -5,7 +5,7 @@
 ## Features
 
 - Record income and expenses with category, date, amount, and notes.
-- View a chronological transaction ledger, edit or delete entries, and search by description or notes.
+- View a paginated chronological transaction ledger, edit or delete entries, and search by description or notes.
 - Filter transactions by type, category, and date range.
 - Export the currently filtered ledger to CSV, with spreadsheet formula injection protection.
 - Create monthly spending limits by category.
