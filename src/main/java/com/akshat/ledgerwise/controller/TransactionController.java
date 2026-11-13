@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/transactions")
@@ -31,9 +32,20 @@ public class TransactionController {
                        @RequestParam(required = false) TransactionType type,
                        @RequestParam(required = false) Category category,
                        @RequestParam(required = false) LocalDate from,
-                       @RequestParam(required = false) LocalDate to, Model model) {
+                       @RequestParam(required = false) LocalDate to,
+                       @RequestParam(defaultValue = "0") int page, Model model) {
         List<FinancialTransaction> filtered = filteredTransactions(q, type, category, from, to);
-        model.addAttribute("transactions", filtered);
+        int pageSize = 10;
+        int totalPages = Math.max(1, (int) Math.ceil(filtered.size() / (double) pageSize));
+        int currentPage = Math.max(0, Math.min(page, totalPages - 1));
+        int start = currentPage * pageSize;
+        int end = Math.min(start + pageSize, filtered.size());
+        List<FinancialTransaction> pageItems = new ArrayList<>(filtered.subList(start, end));
+        model.addAttribute("transactions", pageItems);
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("hasPrevious", currentPage > 0);
+        model.addAttribute("hasNext", currentPage + 1 < totalPages);
         model.addAttribute("query", q == null ? "" : q);
         model.addAttribute("selectedType", type);
         model.addAttribute("types", TransactionType.values());
@@ -41,6 +53,7 @@ public class TransactionController {
         model.addAttribute("selectedCategory", category);
         model.addAttribute("from", from);
         model.addAttribute("to", to);
+        model.addAttribute("resultCount", filtered.size());
         return "transactions";
     }
 
