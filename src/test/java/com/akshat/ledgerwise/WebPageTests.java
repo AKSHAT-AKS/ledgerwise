@@ -33,7 +33,8 @@ class WebPageTests {
         mockMvc.perform(get("/transactions")).andExpect(status().isOk());
         mockMvc.perform(get("/transactions/new")).andExpect(status().isOk());
         mockMvc.perform(get("/budgets")).andExpect(status().isOk());
-        mockMvc.perform(get("/reports")).andExpect(status().isOk());
+        mockMvc.perform(get("/reports")).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Six-month cash flow")));
     }
 
     @Test
